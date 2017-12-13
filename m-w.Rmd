@@ -1,0 +1,53 @@
+---
+title: "M&S on Meyer and Weins"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Magallon and Sanderson functions are in geiger
+
+```{r}
+
+library(geiger)
+setwd("/Users/michael_alfaro/Dropbox/teaching/macro-2017/magallon-sanderson-stuff/M&W/")
+
+# load the MW tree
+
+mwtree <- read.tree("20trees.tre")
+tt <- mwtree$tree_a
+
+#plot the tree
+
+plot(tt)
+
+#get the global rate for tree a
+
+rr <- bd.ms(tt)
+
+
+# read in stats for treea
+
+agerichness <- read.table("tree_a_stats.csv", as.is = T, header = T, sep = ",")
+
+# get the crown limits given the global rate and the sampled times
+
+times <- agerichness$crown
+
+
+
+for (ii in 1:10){
+  
+  cladetime <- times[ii]
+  res <- crown.limits(cladetime, rr, epsilon = 0)
+  print(res)
+  
+}
+
+
+
+```

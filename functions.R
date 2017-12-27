@@ -19,7 +19,7 @@ MS.estimates.full <- function(Tree.clade, epsilon){ # e.g., MS.estimates.full(Tr
   return(estimates)
 }
 
-MS.estimates.half <- function(Tree.clade, epsilon){ # e.g., MS.estimates.half(Tree.clade = "G.d", epsilon = 0)
+MS.estimates.half <- function(Tree.clade,tree_list_full,tree_list_half, epsilon){ # e.g., MS.estimates.half(Tree.clade = "G.d", epsilon = 0)
   require(geiger)
   full.n.tips <- tree_list_full[[Tree.clade]][[3]]
   clade.n.tips <- tree_list_half[[Tree.clade]][[3]]
@@ -41,7 +41,7 @@ MS.estimates.half <- function(Tree.clade, epsilon){ # e.g., MS.estimates.half(Tr
   return(estimates)
 }
 
-MS.estimates.quarter <- function(Tree.clade, epsilon){ # e.g., MS.estimates.quarter(Tree.clade = "M.j", epsilon = 0.9)
+MS.estimates.quarter <- function(Tree.clade,tree_list_full,tree_list_quarter, epsilon){ # e.g., MS.estimates.quarter(Tree.clade = "M.j", epsilon = 0.9)
   require(geiger)
   full.n.tips <- tree_list_full[[Tree.clade]][[3]]
   clade.n.tips <- tree_list_quarter[[Tree.clade]][[3]]
@@ -62,3 +62,26 @@ MS.estimates.quarter <- function(Tree.clade, epsilon){ # e.g., MS.estimates.quar
   names(estimates) <- c("Tree.clade", "epsilon", "Tree.r", "clade.crown.r", "clade.stem.r", "clade.n.tips", "clade.crown.bounds", "exceptionally.diverse.crown", "exceptionally.depauperate.crown", "exceptional.crown.pval", "clade.stem.bounds", "exceptionally.diverse.stem", "exceptionally.depauperate.stem", "exceptional.stem.pval")
   return(estimates)
 }
+
+
+pruneTrees <- function(tree, dropProp = 0.5, saveFile="20trees_Half.tre") {
+  num.Drop <- round(dropProp * length(tree[[1]]$tip.label))
+  new.trees <- drop.tip(tree[[1]], sample(tree[[1]]$tip.label,num.Drop))
+  for(ii in seq(2,length(tree))){ 
+    num.Drop <- round(dropProp * length(tree[[ii]]$tip.label))
+    new.trees <- append(new.trees,drop.tip(tree[[ii]], sample(tree[[ii]]$tip.label,num.Drop)))}
+  names(new.trees) <- names(tree)
+  write.tree(new.trees,file=saveFile)
+  return(new.trees)
+}
+
+fillPrunedLists <- function(new.tree, trees.labs){
+  tree.name <- rep(LETTERS, length.out = 20)
+  clade.name <- rep(letters, length.out = 10)
+  names(new.tree) <- tree.name
+  for(jj in tree.name){
+    for(aa in clade.name){
+      trees.labs[3][which(trees.labs$Backbone.tree==jj & trees.labs$Clade==aa),] <- length(new.tree[[jj]]$tip.label[grep(aa,new.tree[[jj]]$tip.label)])}}
+  return(trees.labs)
+}
+
